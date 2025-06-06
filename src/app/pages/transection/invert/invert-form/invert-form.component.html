@@ -1,0 +1,114 @@
+<div class="card">
+  <div class="card-header bg-primary text-white">
+    <h5>INWERD TRANSACTION (STOCK IN)</h5>
+  </div>
+    <div class="card-body">
+      <form #invertForm="ngForm">
+        <!-- Header Section --> 
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label">Transaction ID</label>
+            <input type="text" class="form-control" [value]="currentTransaction.transactionId" readonly>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-control" [(ngModel)]="currentTransaction.date" name="date" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Supplier</label>
+            <select class="form-select" [(ngModel)]="currentTransaction.supplier" name="supplier" required>
+              <option *ngFor="let supplier of suppliers" [value]="supplier">{{ supplier }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Reference & Warehouse -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Reference No.</label>
+            <input type="text" class="form-control" [(ngModel)]="currentTransaction.referenceNo" name="referenceNo">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Warehouse Location</label>
+            <select class="form-select" [(ngModel)]="currentTransaction.warehouseLocation" name="warehouse">
+              <option *ngFor="let location of warehouseLocations" [value]="location">{{ location }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="table-responsive mb-3">
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>UOM</th>
+                <th>Rate (₹)</th>
+                <th>Amount (₹)</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of currentTransaction.items; let i = index">
+                <td>
+                  <select class="form-select" [(ngModel)]="item.item" [compareWith]="compareItems" name="item_{{i}}">
+                    <option *ngFor="let product of inventoryItems" [ngValue]="product">
+                      {{ product.name }} ({{ product.code }})
+                    </option>
+                  </select>
+                </td>
+                <td>
+                  <input type="number" class="form-control" [(ngModel)]="item.quantity" (change)="updateItemAmount(i)"
+                    name="qty_{{i}}" min="0">
+                </td>
+                <td>{{ item.item.uom }}</td>
+                <td>
+                  <input type="number" class="form-control" [(ngModel)]="item.rate" (change)="updateItemAmount(i)"
+                    name="rate_{{i}}" min="0" step="0.01">
+                </td>
+                <td>{{ item.amount | currency:'INR' }}</td>
+                <td>
+                  <button type="button" class="btn btn-danger btn-sm" (click)="removeItem(i)">Delete
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="addItem()">
+            <i class="bi bi-plus"></i> Add Item
+          </button>
+        </div>
+
+        <!-- Totals -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Received By</label>
+            <input type="text" class="form-control" [(ngModel)]="currentTransaction.receivedBy" name="receivedBy">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Total Amount</label>
+            <input type="text" class="form-control" [value]="currentTransaction.totalAmount | currency:'INR'" readonly>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-end">
+          <button type="button" class="btn btn-secondary me-2" (click)="resetForm()">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-primary" (click)="saveTransaction()" 
+            [disabled]="!invertForm.form.valid || currentTransaction.items.length === 0 || currentTransaction.totalAmount <= 0 || !currentTransaction.date || !currentTransaction.supplier  ">
+            {{ isEditing ? 'Update' : 'Save' }}
+          </button>
+        </div>
+
+        <!-- <div class="text-center">
+          <button class="btn btn-secondary" [routerLink]="['/main/transaction/invert/list']">
+            Back to List
+          </button>
+        </div> -->
+      </form>
+    </div>
+  </div>

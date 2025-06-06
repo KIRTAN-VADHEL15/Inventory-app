@@ -1,0 +1,52 @@
+<div class="container mt-4">
+  <h3 class="mb-3">Item Master</h3>
+
+<form (submit)="onSubmit()" class="mb-4">
+    <div class="row">
+        <div class="col-md-3 mb-2">
+            <label>Item Code</label>
+            <input [(ngModel)]="item.code" name="code" class="form-control" required />
+        </div>
+        <div class="col-md-3 mb-2">
+            <label>Item Name</label>
+            <input [(ngModel)]="item.name" name="name" class="form-control" required />
+        </div>
+        <div class="col-md-3 mb-2">
+            <label>Purchase Price</label>
+            <input [(ngModel)]="item.purchasePrice" name="purchasePrice" type="number" class="form-control" required     />
+        </div>
+        <div class="col-md-3 mb-2">
+            <label>Selling Price</label>
+            <input [(ngModel)]="item.sellingPrice" name="sellingPrice" type="number" class="form-control" required />
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-2" [disabled]="!item.code || !item.name || !item.purchasePrice || !item.sellingPrice">
+        {{ isEdit ? 'Update' : 'Add' }} Item
+    </button>
+</form>
+
+  <table class="table table-bordered table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th>Code</th>
+        <th>Name</th>
+        <th>Purchase Price</th>
+        <th>Selling Price</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let itm of items; let i = index">
+        <td>{{ itm.code }}</td>
+        <td>{{ itm.name }}</td>
+        <td>{{ itm.purchasePrice }}</td>
+        <td>{{ itm.sellingPrice }}</td>
+        <td>
+          <button class="btn btn-warning btn-sm me-2" (click)="onEdit(i)">Edit</button>
+          <button class="btn btn-danger btn-sm" (click)="onDelete(i)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+    

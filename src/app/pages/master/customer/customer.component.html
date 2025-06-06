@@ -1,0 +1,45 @@
+<div class="container mt-4">
+  <h3 class="mb-3">Customer Master</h3>
+
+  <form (submit)="onSubmit()" class="mb-4">
+    <div class="row">
+      <div class="col-md-4 mb-2">
+        <label>Customer Code</label>
+        <input [(ngModel)]="customer.code" name="code" class="form-control" required />
+      </div>
+      <div class="col-md-4 mb-2">
+        <label>Customer Name</label>
+        <input [(ngModel)]="customer.name" name="name" class="form-control" required />
+      </div>
+      <div class="col-md-4 mb-2">
+        <label>Customer Address</label>
+        <input [(ngModel)]="customer.address" name="address" class="form-control" required />
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-2" [disabled]="!customer.code || !customer.name || !customer.address">
+      {{ isEdit ? 'Update' : 'Add' }} Customer
+    </button>
+  </form>
+
+  <table class="table table-bordered table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th>Code</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let cust of customers; let i = index">
+        <td>{{ cust.code }}</td>
+        <td>{{ cust.name }}</td>
+        <td>{{ cust.address }}</td>
+        <td>
+          <button class="btn btn-warning btn-sm me-2" (click)="onEdit(i)">Edit</button>
+          <button class="btn btn-danger btn-sm" (click)="onDelete(i)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

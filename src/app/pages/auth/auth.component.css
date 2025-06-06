@@ -1,0 +1,54 @@
+/* body {
+  background-color: #f8f9fa;
+}
+.register-container {
+  max-width: 400px;
+  margin: auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+.auth-container {
+  background: #f8f9fa;
+} */
+
+.flip-container {
+  perspective: 1000px;
+  width: 100%;
+  position: relative;
+  height: 100%;
+}
+
+.flipper {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  position: relative;
+  width: 100%;
+  min-height: 420px;
+}
+
+.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+  position: absolute;
+  width: 100%;
+  backface-visibility: hidden;
+  top: 0;
+  left: 0;
+  padding: 1rem;
+  border-radius: 1rem;
+  /* background: #fff; */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-front {
+  z-index: 2;
+  transform: rotateY(0deg);
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}

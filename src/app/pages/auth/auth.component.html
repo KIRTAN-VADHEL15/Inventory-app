@@ -1,0 +1,239 @@
+<div class="flip-card card shadow-lg p-4 d-flex justify-content-center align-items-center vh-100 bg-light" style="min-width: 350px; border-radius: 1rem;">
+  <div class="flip-card card shadow-lg p-4" style="min-width: 350px; border-radius: 1rem;">
+    <!-- Top tabs for toggling -->
+    <div class="d-flex justify-content-center mb-4">
+      <button
+        class="btn px-4"
+        [ngClass]="{
+          'btn-primary text-white': isLoginMode,
+          'btn-outline-primary': !isLoginMode
+        }"
+        (click)="switchToLogin()"
+      >
+        Login
+      </button>
+
+      <button
+        class="btn px-4 ms-2"
+        [ngClass]="{
+          'btn-primary text-white': !isLoginMode,
+          'btn-outline-primary': isLoginMode
+        }"
+        (click)="switchToSignup()"
+      >
+        Signup
+      </button>
+    </div>
+
+
+    <div class="flip-container">
+    <div class="flipper" [ngClass]="{ 'flipped': !isLoginMode }">
+  <div class="card-front">
+    <!-- ▼ LOGIN FORM ▼ -->
+    <form
+      *ngIf="isLoginMode"
+      (ngSubmit)="onLogin(loginForm)"
+      #loginForm="ngForm"
+    >
+      <div class="mb-3">
+        <label for="loginUserId" class="form-label">User ID</label>
+        <input
+          type="text"
+          class="form-control"
+          id="loginUserId"
+          placeholder="Enter User ID"
+          required
+          [(ngModel)]="loginData.userId"
+          name="userId"
+          #loginUserIdInput="ngModel"
+          [class.is-invalid]="
+            (loginUserIdInput.touched && loginUserIdInput.invalid) ||
+            loginError
+          "
+        />
+        <div
+          *ngIf="
+            loginUserIdInput.touched && loginUserIdInput.errors?.['required']
+          "
+          class="invalid-feedback"
+        >
+          User ID is required
+        </div>
+        <div *ngIf="loginError" class="invalid-feedback">
+          {{ loginErrorMessage }}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="loginPassword" class="form-label">Password</label>
+        <input
+          type="password"
+          class="form-control"
+          id="loginPassword"
+          placeholder="Enter Password"
+          required
+          [(ngModel)]="loginData.password"
+          name="password"
+          #loginPasswordInput="ngModel"
+          [class.is-invalid]="
+            (loginPasswordInput.touched && loginPasswordInput.invalid) ||
+            loginError
+          "
+        />
+        <div
+          *ngIf="
+            loginPasswordInput.touched &&
+            loginPasswordInput.errors?.['required']
+          "
+          class="invalid-feedback"
+        >
+          Password is required
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Login</button>
+
+    </form>
+  </div>
+  <div class="card-back">
+    <!-- ▼ SIGNUP (REGISTER) FORM ▼ -->
+    <form
+      *ngIf="!isLoginMode"
+      (ngSubmit)="onRegister(registerForm)"
+      #registerForm="ngForm"
+    >
+      <div class="mb-3">
+        <label for="regUserId" class="form-label">User ID</label>
+        <input
+          type="text"
+          class="form-control"
+          id="regUserId"
+          placeholder="Enter User ID"
+          required
+          minlength="3"
+          [(ngModel)]="registerData.userId"
+          name="userId"
+          #regUserIdInput="ngModel"
+          [class.is-invalid]="
+            (regUserIdInput.touched && regUserIdInput.invalid) ||
+            registerError && registerErrorField === 'userId'
+          "
+        />
+        <div
+          *ngIf="
+            regUserIdInput.touched && regUserIdInput.errors?.['required']
+          "
+          class="invalid-feedback"
+        >
+          User ID is required
+        </div>
+        <div
+          *ngIf="
+            regUserIdInput.touched && regUserIdInput.errors?.['minlength']
+          "
+          class="invalid-feedback"
+        >
+          User ID must be at least 3 characters
+        </div>
+        <div
+          *ngIf="registerError && registerErrorField === 'userId'"
+          class="invalid-feedback"
+        >
+          {{ registerErrorMessage }}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="regUserName" class="form-label">Username</label>
+        <input
+          type="text"
+          class="form-control"
+          id="regUserName"
+          placeholder="Enter Username"
+          required
+          minlength="3"
+          [(ngModel)]="registerData.userName"
+          name="userName"
+          #regUserNameInput="ngModel"
+          [class.is-invalid]="
+            (regUserNameInput.touched && regUserNameInput.invalid) ||
+            registerError && registerErrorField === 'userName'
+          "
+        />
+        <div
+          *ngIf="
+            regUserNameInput.touched &&
+            regUserNameInput.errors?.['required']
+          "
+          class="invalid-feedback"
+        >
+          Username is required
+        </div>
+        <div
+          *ngIf="
+            regUserNameInput.touched &&
+            regUserNameInput.errors?.['minlength']
+          "
+          class="invalid-feedback"
+        >
+          Username must be at least 3 characters
+        </div>
+        <div
+          *ngIf="registerError && registerErrorField === 'userName'"
+          class="invalid-feedback"
+        >
+          {{ registerErrorMessage }}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="regPassword" class="form-label">Password</label>
+        <input
+          type="password"
+          class="form-control"
+          id="regPassword"
+          placeholder="Enter Password"
+          required
+          minlength="6"
+          [(ngModel)]="registerData.password"
+          name="password"
+          #regPasswordInput="ngModel"
+          [class.is-invalid]="
+            (regPasswordInput.touched && regPasswordInput.invalid) ||
+            registerError && registerErrorField === 'password'
+          "
+        />
+        <div
+          *ngIf="
+            regPasswordInput.touched &&
+            regPasswordInput.errors?.['required']
+          "
+          class="invalid-feedback"
+        >
+          Password is required
+        </div>
+        <div
+          *ngIf="
+            regPasswordInput.touched &&
+            regPasswordInput.errors?.['minlength']
+          "
+          class="invalid-feedback"
+        >
+          Password must be at least 6 characters
+        </div>
+        <div
+          *ngIf="registerError && registerErrorField === 'password'"
+          class="invalid-feedback"
+        >
+          {{ registerErrorMessage }}
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Signup</button>
+    </form>
+  </div>
+  </div>
+  </div>
+  </div>
+</div>
+ 

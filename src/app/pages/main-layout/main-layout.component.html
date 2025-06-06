@@ -1,0 +1,101 @@
+<div class="container-fluid">
+  <div class="row flex-nowrap">
+
+    <!-- Sidebar -->
+    <nav [class.d-none]="!sidebarVisible && isMobile" class="col-12 col-md-2 bg-dark text-white p-3 vh-100">
+      <h4 class="d-flex justify-content-between align-items-center">
+        <a class="nav-link text-white" routerLink="/main" (click)="onNavigate()">
+          <i class="bi bi-box-seam me-2"></i>Inventory
+        </a>
+      </h4>
+
+      <ul class="nav flex-column mt-3">
+
+        <!-- Collapsible Master Menu -->
+        <li class="nav-item">
+          <a class="nav-link text-white" data-bs-toggle="collapse" href="#masterMenu" role="button"
+            aria-expanded="false" aria-controls="masterMenu">
+            <i class="bi bi-gear-fill me-2"></i>Master
+          </a>
+          <div class="collapse" id="masterMenu">
+            <ul class="nav flex-column ms-3">
+              <li class="nav-item">
+                <a class="nav-link text-white" routerLink="/main/master/customer" (click)="onNavigate()">
+                  <i class="bi bi-person-fill me-2"></i>Customer Master
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white" routerLink="/main/master/supplier" (click)="onNavigate()">
+                  <i class="bi bi-truck me-2"></i>Supplier Master
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white" routerLink="/main/master/item" (click)="onNavigate()">
+                  <i class="bi bi-box2-fill me-2"></i>Item Master
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+
+        <!-- Transaction Menu -->
+        <li class="nav-item">
+          <a class="nav-link text-white" data-bs-toggle="collapse" href="#transactionMenu" role="button"
+            aria-expanded="false" aria-controls="transactionMenu">
+            <i class="bi bi-arrow-left-right me-2"></i>Transaction
+          </a>
+          <div class="collapse" id="transactionMenu">
+            <ul class="nav flex-column ms-3">
+              <li class="nav-item">
+                <a class="nav-link text-white" routerLink="/main/transaction/invert" (click)="onNavigate()">
+                  <i class="bi bi-box-arrow-in-down me-2"></i>InWerd
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white" routerLink="/main/transaction/outvert" (click)="onNavigate()">
+                  <i class="bi bi-box-arrow-up me-2"></i>OutWerd
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+
+        <!-- Report Menu -->
+        <li class="nav-item">
+          <a class="nav-link text-white" data-bs-toggle="collapse" href="#reportMenu" role="button"
+            aria-expanded="false" aria-controls="reportMenu">
+            <i class="bi bi-bar-chart-fill me-2"></i>Report
+          </a>
+          <div class="collapse" id="reportMenu">
+            <ul class="nav flex-column ms-3">
+              <li class="nav-item">
+                <a class="nav-link text-white" routerLink="/main/report" (click)="onNavigate()">
+                  <i class="bi bi-clipboard-data me-2"></i>Transaction Report
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white" routerLink="/main/report/inwerd-register" (click)="onNavigate()">
+                  <i class="bi bi-journal-arrow-down me-2"></i>Inwerd Register
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white" routerLink="/main/report/outwerd-register" (click)="onNavigate()">
+                  <i class="bi bi-journal-arrow-up me-2"></i>OutWerd Register
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+
+      </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="col p-4">
+      <!-- Toggle button for mobile -->
+      <button class="btn btn-dark d-md-none mb-3" (click)="toggleSidebar()">☰ Menu</button>
+
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

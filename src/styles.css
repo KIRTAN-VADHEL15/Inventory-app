@@ -1,0 +1,15 @@
+/* You can add global styles to this file, and also import other style files */
+@media print {
+  nav {
+    display: none !important;
+  }
+
+  .col {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  .btn, .d-md-none {
+    display: none !important;
+  }
+}

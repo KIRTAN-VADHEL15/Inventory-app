@@ -1,0 +1,45 @@
+<div class="container mt-4">
+  <h3 class="mb-3">Supplier Master</h3>
+
+  <form (submit)="onSubmit()" class="mb-4">
+    <div class="row">
+      <div class="col-md-4 mb-2">
+        <label>Supplier Code</label>
+        <input type="text" [(ngModel)]="supplier.code" name="code" class="form-control" required />
+      </div>
+      <div class="col-md-4 mb-2">
+        <label>Supplier Name</label>
+        <input [(ngModel)]="supplier.name" name="name" class="form-control" required />
+      </div>
+      <div class="col-md-4 mb-2">
+        <label>Supplier Address</label>
+        <input [(ngModel)]="supplier.address" name="address" class="form-control" required />
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-2" [disabled]="!supplier.code || !supplier.name || !supplier.address">
+      {{ isEdit ? 'Update' : 'Add' }} Supplier
+    </button>
+  </form>
+
+  <table class="table table-bordered table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th>Code</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let supp of suppliers; let i = index">
+        <td>{{ supp.code }}</td>
+        <td>{{ supp.name }}</td>
+        <td>{{ supp.address }}</td>
+        <td>
+          <button class="btn btn-warning btn-sm me-2" (click)="onEdit(i)">Edit</button>
+          <button class="btn btn-danger btn-sm" (click)="onDelete(i)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

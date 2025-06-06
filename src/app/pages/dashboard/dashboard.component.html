@@ -1,0 +1,64 @@
+<div class="container mt-5">
+  <h2 class="text-center">Welcome to Inventory Management System</h2>
+  <p class="text-center text-muted">Manage your customers, suppliers, and items easily.</p>
+
+  <!-- 🔷 Master Section -->
+  <div class="row mt-4">
+    <div class="col-md-4">
+      <a routerLink="/main/master/customer" class="text-decoration-none">
+        <div class="card text-center shadow">
+          <div class="card-body">
+            <h5 class="card-title">Customer Master</h5>
+            <p class="card-text">Add, edit, delete customers</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a routerLink="/main/master/supplier" class="text-decoration-none">
+        <div class="card text-center shadow">
+          <div class="card-body">
+            <h5 class="card-title">Supplier Master</h5>
+            <p class="card-text">Manage all your suppliers</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a routerLink="/main/master/item" class="text-decoration-none">
+        <div class="card text-center shadow">
+          <div class="card-body">
+            <h5 class="card-title">Item Master</h5>
+            <p class="card-text">Track your inventory items</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 🔶 Transaction Section -->
+  <h4 class="text-center mt-5">Transaction</h4>
+  <p class="text-center text-muted">Manage invert and outvert operations</p>
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <a routerLink="/main/transaction/invert" class="text-decoration-none">
+        <div class="card text-center shadow">
+          <div class="card-body">
+            <h5 class="card-title">Invert</h5>
+            <p class="card-text">Enter inventory coming in</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-6">
+      <a routerLink="/main/transaction/outvert" class="text-decoration-none">
+        <div class="card text-center shadow">
+          <div class="card-body">
+            <h5 class="card-title">Outvert</h5>
+            <p class="card-text">Record inventory going out</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>

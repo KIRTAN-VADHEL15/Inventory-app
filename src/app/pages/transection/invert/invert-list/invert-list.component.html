@@ -1,0 +1,33 @@
+<div class="container mt-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Inward Transactions</h4>
+    <button class="btn btn-primary" (click)="addTransaction()">Add</button>
+  </div>
+  <div class="card-body">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Date</th>
+          <th>Supplier</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tx of transactionList; let i = index">
+          <td>{{ tx.transactionId }}</td>
+          <td>{{ tx.date }}</td>
+          <td>{{ tx.supplier }}</td>
+          <td>{{ tx.items.length }} items</td>
+          <td>{{ tx.totalAmount | currency:'INR' }}</td>
+          <td>
+            <button class="btn btn-warning btn-sm me-1" (click)="editTransaction(tx, i)">Edit</button>
+            <button class="btn btn-danger btn-sm" (click)="deleteTransaction(i)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

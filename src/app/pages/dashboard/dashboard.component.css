@@ -1,0 +1,126 @@
+/* Dashboard Component CSS - Modern, Clean, Responsive */
+
+:host {
+    display: block;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #222;
+    padding: 32px 0;
+}
+
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 6px 32px rgba(44, 62, 80, 0.08);
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.dashboard-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #2d3a4b;
+}
+
+.dashboard-actions button {
+    background: #4f8cff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.dashboard-actions button:hover {
+    background: #2563eb;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+}
+
+.stat-card {
+    background: #f7fafc;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.05);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: box-shadow 0.2s;
+}
+.stat-card:hover {
+    box-shadow: 0 6px 24px rgba(44, 62, 80, 0.12);
+}
+
+.stat-title {
+    font-size: 1.1rem;
+    color: #6b7280;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.04);
+}
+
+.dashboard-table th,
+.dashboard-table td {
+    padding: 14px 18px;
+    text-align: left;
+}
+
+.dashboard-table th {
+    background: #f1f5f9;
+    color: #374151;
+    font-weight: 600;
+}
+
+.dashboard-table tr:nth-child(even) {
+    background: #f9fafb;
+}
+
+.dashboard-table tr:hover {
+    background: #e0e7ef;
+}
+
+@media (max-width: 800px) {
+    .dashboard-container {
+        padding: 20px 8px;
+    }
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .dashboard-title {
+        font-size: 2rem;
+    }
+}

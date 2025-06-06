@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="report-header mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1><i class="fas fa-file-invoice-dollar me-3"></i>Transaction Report</h1>
+                            <p class="mb-0">View and analyze all inward and outward transactions</p>
+                        </div>
+                        <button class="btn btn-light"><i class="fas fa-print me-2"></i>Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filter-section">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Date Range</label>
+                    <div class="input-group">
+                        <input type="date" class="form-control" value="2024-06-01">
+                        <span class="input-group-text">to</span>
+                        <input type="date" class="form-control" value="2024-06-30">
+                    </div>
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label">Transaction Type</label>
+                    <select class="form-select">
+                        <option value="all">All Transactions</option>
+                        <option value="inward">Inward Only</option>
+                        <option value="outward">Outward Only</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label">Item Type</label>
+                    <select class="form-select">
+                        <option value="all">All Items</option>
+                        <option value="pipes">PVC Pipes</option>
+                        <option value="fittings">Fittings</option>
+                        <option value="valves">Valves</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label">Supplier/Customer</label>
+                    <select class="form-select">
+                        <option value="all">All Parties</option>
+                        <option value="supplier1">ABC Suppliers</option>
+                        <option value="supplier2">XYZ Distributors</option>
+                        <option value="customer1">Global Builders</option>
+                        <option value="customer2">City Contractors</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <button class="btn filter-btn text-white w-100"><i class="fas fa-filter me-2"></i>Apply Filters</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stat-card inward">
+                    <i class="fas fa-arrow-down fa-2x"></i>
+                    <div class="number">₹1,85,250</div>
+                    <div>Total Inward Value</div>
+                    <small>42 transactions</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card outward">
+                    <i class="fas fa-arrow-up fa-2x"></i>
+                    <div class="number">₹1,42,800</div>
+                    <div>Total Outward Value</div>
+                    <small>38 transactions</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card net">
+                    <i class="fas fa-exchange-alt fa-2x"></i>
+                    <div class="number">₹42,450</div>
+                    <div>Net Inventory Value</div>
+                    <small>Positive balance</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Summary -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="chart-container">
+                    <canvas id="transactionChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="summary-card">
+                    <h5><i class="fas fa-chart-pie me-2"></i>Inventory Summary</h5>
+                    <div class="mt-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div>PVC Pipes</div>
+                            <div class="fw-bold">42%</div>
+                        </div>
+                        <div class="progress mb-3" style="height: 10px;">
+                            <div class="progress-bar bg-success" style="width: 42%"></div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <div>Fittings</div>
+                            <div class="fw-bold">28%</div>
+                        </div>
+                        <div class="progress mb-3" style="height: 10px;">
+                            <div class="progress-bar bg-info" style="width: 28%"></div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <div>Valves</div>
+                            <div class="fw-bold">18%</div>
+                        </div>
+                        <div class="progress mb-3" style="height: 10px;">
+                            <div class="progress-bar bg-warning" style="width: 18%"></div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <div>Other Items</div>
+                            <div class="fw-bold">12%</div>
+                        </div>
+                        <div class="progress mb-3" style="height: 10px;">
+                            <div class="progress-bar bg-secondary" style="width: 12%"></div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h6>Top Items by Movement</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                PVC Pipe (4-inch)
+                                <span class="badge bg-primary rounded-pill">142</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Elbow Fitting (2-inch)
+                                <span class="badge bg-primary rounded-pill">98</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Ball Valve (1-inch)
+                                <span class="badge bg-primary rounded-pill">76</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Transaction Details</h5>
+                <button class="btn export-btn text-white"><i class="fas fa-file-export me-2"></i>Export to Excel</button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Transaction ID</th>
+                                <th>Type</th>
+                                <th>Party</th>
+                                <th>Item Details</th>
+                                <th>Quantity</th>
+                                <th>Rate (₹)</th>
+                                <th>Amount (₹)</th>
+                                <th>Reference No</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Inward Transactions -->
+                            <tr class="inward-row">
+                                <td>15 Jun 2024</td>
+                                <td>INV-1024</td>
+                                <td><span class="transaction-type inward-badge">Inward</span></td>
+                                <td>ABC Suppliers</td>
+                                <td>PVC Pipe (4-inch)</td>
+                                <td>250</td>
+                                <td>320</td>
+                                <td>80,000</td>
+                                <td>GRN-2456</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary action-btn"><i class="fas fa-eye"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="inward-row">
+                                <td>12 Jun 2024</td>
+                                <td>INV-1021</td>
+                                <td><span class="transaction-type inward-badge">Inward</span></td>
+                                <td>Global Pipes Ltd</td>
+                                <td>Elbow Fitting (2-inch)</td>
+                                <td>500</td>
+                                <td>85</td>
+                                <td>42,500</td>
+                                <td>GRN-2442</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary action-btn"><i class="fas fa-eye"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="inward-row">
+                                <td>10 Jun 2024</td>
+                                <td>INV-1018</td>
+                                <td><span class="transaction-type inward-badge">Inward</span></td>
+                                <td>Plasto Industries</td>
+                                <td>Ball Valve (1-inch)</td>
+                                <td>200</td>
+                                <td>210</td>
+                                <td>42,000</td>
+                                <td>GRN-2438</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary action-btn"><i class="fas fa-eye"></i></button>
+                                </td>
+                            </tr>
+                            
+                            <!-- Outward Transactions -->
+                            <tr class="outward-row">
+                                <td>18 Jun 2024</td>
+                                <td>OUT-0756</td>
+                                <td><span class="transaction-type outward-badge">Outward</span></td>
+                                <td>City Contractors</td>
+                                <td>PVC Pipe (4-inch)</td>
+                                <td>150</td>
+                                <td>380</td>
+                                <td>57,000</td>
+                                <td>INV-7894</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary action-btn"><i class="fas fa-eye"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="outward-row">
+                                <td>14 Jun 2024</td>
+                                <td>OUT-0752</td>
+                                <td><span class="transaction-type outward-badge">Outward</span></td>
+                                <td>Global Builders</td>
+                                <td>Elbow Fitting (2-inch)</td>
+                                <td>300</td>
+                                <td>120</td>
+                                <td>36,000</td>
+                                <td>INV-7878</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary action-btn"><i class="fas fa-eye"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="outward-row">
+                                <td>08 Jun 2024</td>
+                                <td>OUT-0748</td>
+                                <td><span class="transaction-type outward-badge">Outward</span></td>
+                                <td>Metro Developers</td>
+                                <td>Ball Valve (1-inch)</td>
+                                <td>100</td>
+                                <td>260</td>
+                                <td>26,000</td>
+                                <td>INV-7865</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary action-btn"><i class="fas fa-eye"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="outward-row">
+                                <td>05 Jun 2024</td>
+                                <td>OUT-0745</td>
+                                <td><span class="transaction-type outward-badge">Outward</span></td>
+                                <td>Urban Constructions</td>
+                                <td>PVC Pipe (4-inch)</td>
+                                <td>80</td>
+                                <td>375</td>
+                                <td>30,000</td>
+                                <td>INV-7849</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary action-btn"><i class="fas fa-eye"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Chart
+        const ctx = document.getElementById('transactionChart').getContext('2d');
+        const transactionChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['1-5 Jun', '6-10 Jun', '11-15 Jun', '16-20 Jun', '21-25 Jun', '26-30 Jun'],
+                datasets: [
+                    {
+                        label: 'Inward Transactions',
+                        data: [120000, 85000, 185000, 95000, 110000, 75000],
+                        backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                        borderColor: 'rgba(76, 175, 80, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Outward Transactions',
+                        data: [95000, 110000, 142000, 125000, 98000, 115000],
+                        backgroundColor: 'rgba(244, 67, 54, 0.7)',
+                        borderColor: 'rgba(244, 67, 54, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Weekly Transaction Value (₹)',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return '₹' + value.toLocaleString();
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

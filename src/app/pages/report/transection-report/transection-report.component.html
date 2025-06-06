@@ -1,0 +1,189 @@
+<div class="container mt-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Transaction Report</h2>
+    <button class="btn btn-outline-secondary" (click)="printReport()">
+      🖨️ Print Report
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form class="row g-3 align-items-end">
+        <!-- Date Range -->
+        <div class="col-md-3">
+          <label class="form-label">From Date</label>
+          <input type="date" class="form-control" [(ngModel)]="fromDate" name="fromDate" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">To Date</label>
+          <input type="date" class="form-control" [(ngModel)]="toDate" name="toDate" />
+        </div>
+
+        <!-- Transaction Type -->
+        <div class="col-md-2">
+          <label class="form-label">Transaction Type</label>
+          <select class="form-select" [(ngModel)]="transactionType" name="transactionType">
+            <option value="All">All</option>
+            <option value="Inward">Inward</option>
+            <option value="Outward">Outward</option>
+          </select>
+        </div>
+
+        <!-- Item Type (search by code or name) -->
+        <div class="col-md-2">
+          <label class="form-label">Item Code/Name</label>
+          <input type="text" class="form-control" placeholder="Item code or name" [(ngModel)]="itemType"
+            name="itemType" />
+        </div>
+
+        <!-- Supplier/Customer -->
+        <div cla ss="col-md-2">
+          <label class="form-label">Supplier/Customer</label>
+          <input type="text" class="form-control" placeholder="Party name" [(ngModel)]="partyFilter"
+            name="partyFilter" />
+        </div>
+
+        <!-- Apply Filter Button -->
+        <div class="col-md-12 text-end">
+
+          <button type="button" class="btn btn-primary" (click)="applyFilter()">
+            Apply Filter
+          </button>
+          <button type="button" class="btn btn-secondary ms-2" (click)="resetFilter()">
+            Reset Filter
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Summary Metrics -->
+  <div class="row text-center mb-4">
+    <div class="col-md-4 mb-3">
+      <div class="card border-success">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-center">
+            <span class="fs-3 text-success me-2">▲</span>
+            <div>
+              <h5>Total Inward</h5>
+              <p class="mb-0">
+                {{ totalInwardSum | currency:'INR' }}<br />
+                ({{ totalInwardCount }} transactions)
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card border-danger">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-center">
+            <span class="fs-3 text-danger me-2">▼</span>
+            <div>
+              <h5>Total Outward</h5>
+              <p class="mb-0">
+                {{ totalOutwardSum | currency:'INR' }}<br />
+                ({{ totalOutwardCount }} transactions)
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card border-info">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-center">
+            <span class="fs-3 text-info me-2">↔️</span>
+            <div>
+              <h5>Net Inventory Value</h5>
+              <p class="mb-0">
+                {{ netInventoryValue | currency:'INR' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Placeholder for Inventory Summary Chart -->
+  <!-- <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">Inventory Summary</h5>
+    <button class="btn btn-outline-secondary btn-sm">
+      📊 View Chart
+    </button>
+  </div> -->
+
+  <!-- Transaction Details Table -->
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5>Transaction Details</h5>
+    <button class="btn btn-success btn-sm" (click)="exportToExcel()">
+      📥 Export to Excel
+    </button>
+  </div>
+  <div class="table-responsive" id="print-section">
+    <table class="table table-striped table-bordered">
+      <thead class="table-light">
+        <tr>
+          <th>Date</th>
+          <th>Transaction ID</th>
+          <th>Type</th>
+          <th>Party</th>
+          <th>Item Details</th>
+          <th>Quantity</th>
+          <th>Rate (₹)</th>
+          <th>Credit (₹)</th>
+          <th>Debit (₹)</th>
+          <th>Balance (₹)</th>
+          <th>Reference No</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tx of filteredTransactions">
+          <td>{{ tx.date }}</td>
+          <td>{{ tx.transactionId }}</td>
+          <td>{{ tx.type }}</td>
+          <td>{{ tx.party }}</td>
+          <td>
+            <ul class="list-unstyled mb-0">
+              <li *ngFor="let it of tx.items">
+                {{ it.item?.code || it.itemCode || 'N/A' }} ({{ it.item?.name || it.itemName || it.itemCode || 'N/A' }})
+              </li>
+
+            </ul>
+          </td>
+          <td>
+            {{ getTotalQuantity(tx) }}
+          </td>
+          <td>
+            {{ tx.items.length ? tx.items[0].rate : 0 }}
+          </td>
+          <td *ngIf="tx.type === 'Inward'">{{ tx.totalAmount | currency:'INR' }}</td>
+          <td *ngIf="tx.type !== 'Inward'">-</td>
+
+          <td *ngIf="tx.type === 'Outward'">{{ tx.totalAmount | currency:'INR' }}</td>
+          <td *ngIf="tx.type !== 'Outward'">-</td>
+
+          <td>{{ getRunningBalance(tx) | currency:'INR' }}</td>
+
+          <td>{{ tx.referenceNo }}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary" (click)="viewTransaction(tx)">
+              👁️
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredTransactions.length === 0">
+          <td colspan="10" class="text-center">
+            No transactions found.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

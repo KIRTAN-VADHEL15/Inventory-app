@@ -1,0 +1,107 @@
+<div class="card">
+  <div class="card-header bg-primary text-white">
+    <h5>OUTWERD TRANSACTION (STOCK OUT)</h5>
+  </div>
+  <div class="card-body">
+    <form #outvertForm="ngForm">
+      <!-- Header Section -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label>Transaction ID</label>
+          <input type="text" class="form-control" [value]="transaction.transactionId" readonly>
+        </div>
+        <div class="col-md-6">
+          <label>Date</label>
+          <input type="date" class="form-control" [(ngModel)]="transaction.date" name="date" required>
+        </div>
+      </div>
+
+      <!-- Customer & Reference -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label>Customer</label>
+          <select class="form-control" [(ngModel)]="transaction.customer" name="customer" required>
+            <option value="">Select Customer</option>
+            <option *ngFor="let customer of customers" [value]="customer">{{ customer }}</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label>Reference No.</label>
+          <input type="text" class="form-control" [(ngModel)]="transaction.referenceNo" name="referenceNo">
+        </div>
+      </div>
+
+      <!-- Items Table -->
+      <div class="table-responsive mb-3">
+        <table class="table table-bordered">
+          <thead class="table-light">
+            <tr>
+              <th>Item</th>
+              <th>Quantity</th>
+              <th>Rate (₹)</th>
+              <th>Amount (₹)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of transaction.items; let i = index">
+              <td>
+                <input type="text" class="form-control" [(ngModel)]="item.item" name="item_{{i}}" required>
+              </td>
+              <td>
+                <input type="number" class="form-control" [(ngModel)]="item.quantity" 
+                       (change)="updateAmount(i)" name="quantity_{{i}}" min="1">
+              </td>
+              <td>
+                <input type="number" class="form-control" [(ngModel)]="item.rate" 
+                       (change)="updateAmount(i)" name="rate_{{i}}" min="0" step="0.01">
+              </td>
+              <td>{{ item.amount | currency:'INR' }}</td>
+              <td>
+                <button type="button" class="btn btn-danger btn-sm" (click)="removeItem(i)">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="addItem()">
+          + Add New Row
+        </button>
+      </div>
+
+      <!-- Totals -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label>Total Quantity</label>
+          <input type="number" class="form-control" [value]="transaction.totalQty" readonly>
+        </div>
+        <div class="col-md-6">
+          <label>Total Amount</label>
+          <input type="text" class="form-control" [value]="transaction.totalAmount | currency:'INR'" readonly>
+        </div>
+      </div>
+
+      <!-- Issued By & Shipping -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label>Issued By</label>
+          <input type="text" class="form-control" [(ngModel)]="transaction.issuedBy" name="issuedBy" required>
+        </div>
+        <div class="col-md-6">
+          <label>Shipping</label>
+          <input type="text" class="form-control" [(ngModel)]="transaction.shipping" name="shipping">
+        </div>
+      </div>
+      <!-- Buttons -->
+      <div class="text-end">
+        <button type="button" class="btn btn-secondary me-2" (click)="cancel()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-primary" (click)="saveTransaction()" [disabled]="!outvertForm.form.valid">
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
