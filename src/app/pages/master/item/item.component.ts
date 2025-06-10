@@ -1,38 +1,36 @@
-import { Component, OnInit, inject } from '@angular/core'; // Added inject
-import { HttpClient } from '@angular/common/http'; // Added HttpClient
-import { FormsModule } from '@angular/forms'; // Will be needed in template, ensure module has it
-import { CommonModule } from '@angular/common'; // For *ngIf, *ngFor
+import { Component, OnInit, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+// Assuming FormsModule and CommonModule are handled by the NgModule or component's imports if standalone
 
 interface Item {
-  _id?: string; // MongoDB typically uses _id
-  code: string;
-  name: string;
-  purchasePrice: number | null;
-  sellingPrice: number | null;
+  ItemID?: number; // Changed from _id: string to ItemID: number (SQL Server PK)
+  ItemCode: string; // Changed from code
+  ItemName: string; // Changed from name
+  PurchasePrice: number | null; // Changed from purchasePrice
+  SellingPrice: number | null; // Changed from sellingPrice
+  // CreatedAt and UpdatedAt are also available from backend if needed in UI
+  CreatedAt?: string;
+  UpdatedAt?: string;
 }
 
 @Component({
   selector: 'app-item',
-  standalone: false, // Assuming it stays false based on original
-  // If you convert to standalone:true, ensure imports below are in the component's import array
-  // imports: [CommonModule, FormsModule],
+  // standalone: false, // Assuming based on previous setup
   templateUrl: './item.component.html',
   styleUrls: ['./item.component.css']
 })
 export class ItemComponent implements OnInit {
   items: Item[] = [];
-  item: Item = {
-    code: '',
-    name: '',
-    purchasePrice: null,
-    sellingPrice: null
+  item: Item = { // Adjusted field names to match SQL schema and API response
+    ItemCode: '',
+    ItemName: '',
+    PurchasePrice: null,
+    SellingPrice: null
   };
 
   isEdit: boolean = false;
-  // editIndex: number = -1; // We'll use _id for editing with backend
-  private apiUrl = 'http://localhost:5000/api/items'; // Backend API URL
+  private apiUrl = 'http://localhost:5000/api/items'; // Backend API URL remains the same
 
-  // Dependency injection for HttpClient
   private http = inject(HttpClient);
 
   ngOnInit(): void {
@@ -52,11 +50,11 @@ export class ItemComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.isEdit && this.item._id) {
+    if (this.isEdit && this.item.ItemID) {
       // Update existing item
-      this.http.put<Item>(`${this.apiUrl}/${this.item._id}`, this.item).subscribe({
+      this.http.put<Item>(`${this.apiUrl}/${this.item.ItemID}`, this.item).subscribe({
         next: (updatedItem) => {
-          const index = this.items.findIndex(i => i._id === updatedItem._id);
+          const index = this.items.findIndex(i => i.ItemID === updatedItem.ItemID);
           if (index !== -1) {
             this.items[index] = updatedItem;
           }
@@ -69,9 +67,8 @@ export class ItemComponent implements OnInit {
       });
     } else {
       // Create new item
-      // Make a copy and remove _id if it exists from a previous edit form fill
-      const { _id, ...newItem } = this.item;
-      this.http.post<Item>(this.apiUrl, newItem).subscribe({
+      const { ItemID, CreatedAt, UpdatedAt, ...newItemPayload } = this.item; // Exclude PK and audit fields for create
+      this.http.post<Item>(this.apiUrl, newItemPayload).subscribe({
         next: (addedItem) => {
           this.items.push(addedItem);
           this.resetForm();
@@ -85,14 +82,12 @@ export class ItemComponent implements OnInit {
   }
 
   onEdit(itemToEdit: Item) {
-    // Make a deep copy of the item to avoid modifying the list directly
     this.item = { ...itemToEdit };
     this.isEdit = true;
-    // No need for editIndex, _id is used
   }
 
-  onDelete(itemId: string | undefined) {
-    if (!itemId) {
+  onDelete(itemId: number | undefined) { // Changed from string to number
+    if (itemId === undefined) { // Stricter check for undefined
       console.error('Item ID is undefined, cannot delete.');
       alert('Cannot delete item: ID is missing.');
       return;
@@ -102,21 +97,21 @@ export class ItemComponent implements OnInit {
     }
     this.http.delete(`${this.apiUrl}/${itemId}`).subscribe({
       next: () => {
-        this.items = this.items.filter(i => i._id !== itemId);
+        this.items = this.items.filter(i => i.ItemID !== itemId);
         alert('Item deleted successfully.');
-        if (this.isEdit && this.item._id === itemId) {
-          this.resetForm(); // Reset form if the edited item was deleted
+        if (this.isEdit && this.item.ItemID === itemId) {
+          this.resetForm();
         }
       },
       error: (err) => {
         console.error('Error deleting item:', err);
-        alert('Failed to delete item. Check console for details.');
+        alert('Failed to delete item. ' + (err.error?.message || err.error?.errorCode || ''));
       }
     });
   }
 
   resetForm(): void {
-    this.item = { code: '', name: '', purchasePrice: null, sellingPrice: null };
+    this.item = { ItemCode: '', ItemName: '', PurchasePrice: null, SellingPrice: null };
     this.isEdit = false;
   }
 }

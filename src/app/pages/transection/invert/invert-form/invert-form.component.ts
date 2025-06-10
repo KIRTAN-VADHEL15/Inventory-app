@@ -1,79 +1,88 @@
-import { Component, OnInit, inject } from '@angular/core'; // Added inject
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http'; // Added HttpClient
-import { FormsModule } from '@angular/forms'; // Ensure module has it
-import { CommonModule } from '@angular/common'; // For *ngIf, *ngFor
+import { HttpClient } from '@angular/common/http';
+// FormsModule, CommonModule as needed
 
-// Interface for Items fetched from backend (used in dropdown)
-interface BackendItem {
-  _id: string;
-  code: string;
-  name: string;
-  // Add other fields if needed by the form, e.g., purchasePrice for rate default
-  purchasePrice?: number;
+interface BackendItem { // Item fetched from /api/items
+  ItemID: number;      // Changed from _id
+  ItemCode: string;    // Changed from code
+  ItemName: string;    // Changed from name
+  PurchasePrice?: number;
 }
 
-// Interface for items within a transaction (payload for backend)
-interface TransactionItemPayload {
-  itemId: string; // Reference to BackendItem._id
-  quantity: number;
-  rate: number;
-  amount: number;
+interface TransactionItemPayload { // For sending to backend as part of transaction
+  ItemID: number;      // Changed from itemId: string (now refers to BackendItem.ItemID)
+  Quantity: number;
+  Rate: number;
+  // Amount is calculated by backend or can be sent if already calculated
 }
 
-// Interface for the InvertTransaction structure for POST/PUT requests
-interface InvertTransactionPayload {
-  _id?: string; // For updates
-  transactionId: string;
-  date: string;
-  supplier: string;
-  referenceNo: string;
+interface InvertTransactionPayload { // For POST/PUT to /api/invert-transactions
+  TransactionID?: number; // Changed from _id (for updates)
+  CustomTransactionID: string;
+  TransactionDate: string;
+  Supplier: string;
+  ReferenceNo: string;
   items: TransactionItemPayload[];
-  totalAmount: number;
-  receivedBy: string;
-  warehouseLocation: string;
-  notes: string;
+  TotalAmount?: number; // Backend calculates this, but can be sent for validation
+  ReceivedBy: string;
+  WarehouseLocation: string;
+  Notes: string;
+  // CreatedAt, UpdatedAt from backend response
+  CreatedAt?: string;
+  UpdatedAt?: string;
+  // If the backend GET response for a single transaction includes fully populated items:
+  // items?: BackendItemInTransaction[]; // (see below)
 }
 
-// Interface for items as they are managed in the form's items array (includes full BackendItem object)
+// Interface for items as they are part of a transaction fetched from backend (e.g. in GET /api/invert-transactions/:id)
+interface BackendItemInTransaction {
+    TransactionItemID?: number; // PK of the junction table row
+    ItemID: number;
+    ItemCode: string;
+    ItemName: string;
+    Quantity: number;
+    Rate: number;
+    Amount: number; // Calculated amount from backend
+}
+
+
+// Interface for items as they are managed in the form's items array
 interface FormTransactionItem {
-  item?: BackendItem; // The selected inventory item object
-  itemId: string; // Still keep itemId separate for the payload
-  quantity: number;
-  rate: number;
-  amount: number;
+  selectedItem?: BackendItem; // The selected inventory item object from dropdown
+  ItemID: number;           // Store ItemID directly
+  Quantity: number;
+  Rate: number;
+  Amount: number;           // Calculated in form: Quantity * Rate
 }
 
 interface CurrentTransactionForm {
-  _id?: string;
-  transactionId: string;
-  date: string;
-  supplier: string;
-  referenceNo: string;
-  items: FormTransactionItem[]; // Use the FormTransactionItem for the form
-  totalAmount: number;
-  receivedBy: string;
-  warehouseLocation: string;
-  notes: string;
+  TransactionID?: number;       // Changed from _id
+  CustomTransactionID: string;
+  TransactionDate: string;
+  Supplier: string;
+  ReferenceNo: string;
+  items: FormTransactionItem[];
+  TotalAmount: number;
+  ReceivedBy: string;
+  WarehouseLocation: string;
+  Notes: string;
 }
 
 @Component({
   selector: 'app-invert-form',
-  standalone: false,
-  // imports: [CommonModule, FormsModule], // If standalone: true
+  // standalone: false,
   templateUrl: './invert-form.component.html',
   styleUrls: ['./invert-form.component.css']
 })
 export class InvertFormComponent implements OnInit {
-  suppliers = ['Supplier A', 'Supplier B', 'Supplier C']; // Keep or fetch from backend
-  warehouseLocations = ['Main Warehouse', 'Secondary Warehouse', 'Cold Storage']; // Keep or fetch
+  suppliers = ['Supplier A', 'Supplier B', 'Supplier C'];
+  warehouseLocations = ['Main Warehouse', 'Secondary Warehouse', 'Cold Storage'];
 
-  inventoryItems: BackendItem[] = []; // To be fetched from /api/items
+  inventoryItemsForDropdown: BackendItem[] = []; // Fetched from /api/items
 
   currentTransaction: CurrentTransactionForm = this.resetTransactionForm();
-  // transactionList: InvertTransactionPayload[] = []; // Not strictly needed if always navigating away
   isEditing = false;
-  // editIndex: number = -1; // Not used with backend, use _id
 
   private http = inject(HttpClient);
   private itemsApiUrl = 'http://localhost:5000/api/items';
@@ -82,116 +91,131 @@ export class InvertFormComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.loadInitialData();
-    // Handling edit: data should be passed via route params or a service
-    // For simplicity, we'll assume if 'editInvertData' is in localStorage, we load that.
-    // In a real app, use Angular Router's state or a shared service.
-    const editDataString = localStorage.getItem('editInvertData'); // Updated key
+    this.loadInitialDropdownData();
+    // Edit logic: Expects 'editInvertData' in localStorage containing InvertTransactionPayload (with ItemID)
+    const editDataString = localStorage.getItem('editInvertData');
     if (editDataString) {
       const editData: InvertTransactionPayload = JSON.parse(editDataString);
+      // Ensure items in editData are compatible with FormTransactionItem
+      // The backend GET response for a single transaction now returns items with ItemCode, ItemName etc.
+      // So, `editData.items` (if it's from GET /:id) would be Array<BackendItemInTransaction>
+
+      // Let's assume editData comes from a list where items might not be fully populated.
+      // Better: fetch the full transaction from backend if only ID is passed.
+      // For now, if editData is passed, it should conform to InvertTransactionPayload.
+      // And its items should be TransactionItemPayload.
+      // We need to map these to FormTransactionItem by finding the selectedItem from inventoryItemsForDropdown.
       this.populateFormForEdit(editData);
-      localStorage.removeItem('editInvertData'); // Clean up
+      localStorage.removeItem('editInvertData');
     }
   }
 
-  loadInitialData(): void {
+  loadInitialDropdownData(): void {
     this.http.get<BackendItem[]>(this.itemsApiUrl).subscribe({
       next: (items) => {
-        this.inventoryItems = items;
+        this.inventoryItemsForDropdown = items;
         if (!this.isEditing || this.currentTransaction.items.length === 0) {
-         // If not editing or items are empty, initialize with a default item if available
-          this.resetTransactionItems();
+          this.resetTransactionItemsInForm();
         } else {
-          // If editing, ensure items in currentTransaction.items are full objects
-          this.currentTransaction.items.forEach(txItem => {
-            if (txItem.itemId && !txItem.item) {
-              txItem.item = this.inventoryItems.find(invItem => invItem._id === txItem.itemId);
+          // If editing and form items were populated, ensure selectedItem object is linked
+          this.currentTransaction.items.forEach(formItem => {
+            if (formItem.ItemID && !formItem.selectedItem) {
+              formItem.selectedItem = this.inventoryItemsForDropdown.find(invItem => invItem.ItemID === formItem.ItemID);
             }
           });
         }
       },
       error: (err) => {
-        console.error('Error loading inventory items:', err);
-        alert('Failed to load inventory items.');
+        console.error('Error loading inventory items for dropdown:', err);
+        alert('Failed to load inventory items for dropdown.');
       }
     });
   }
 
-  populateFormForEdit(transaction: InvertTransactionPayload): void {
+  populateFormForEdit(txData: InvertTransactionPayload): void {
     this.isEditing = true;
     this.currentTransaction = {
-      ...transaction,
-      items: transaction.items.map(txItemPayload => {
-        const backendItem = this.inventoryItems.find(invItem => invItem._id === txItemPayload.itemId);
+      TransactionID: txData.TransactionID,
+      CustomTransactionID: txData.CustomTransactionID,
+      TransactionDate: new Date(txData.TransactionDate).toISOString().split('T')[0], // Format date
+      Supplier: txData.Supplier,
+      ReferenceNo: txData.ReferenceNo,
+      items: txData.items.map(payloadItem => {
+        const backendItem = this.inventoryItemsForDropdown.find(invItem => invItem.ItemID === payloadItem.ItemID);
         return {
-          ...txItemPayload,
-          item: backendItem // Ensure the 'item' object is populated for the form
+          selectedItem: backendItem,
+          ItemID: payloadItem.ItemID,
+          Quantity: payloadItem.Quantity,
+          Rate: payloadItem.Rate,
+          Amount: payloadItem.Quantity * payloadItem.Rate // Recalculate for form consistency
         };
-      })
+      }),
+      TotalAmount: txData.TotalAmount || 0, // Use provided or recalculate
+      ReceivedBy: txData.ReceivedBy,
+      WarehouseLocation: txData.WarehouseLocation,
+      Notes: txData.Notes
     };
+    if(!txData.TotalAmount) this.calculateTotal(); // Recalculate if not provided
   }
-
 
   resetTransactionForm(): CurrentTransactionForm {
-    const defaultItem = this.inventoryItems.length > 0 ? this.inventoryItems[0] : undefined;
+    const defaultInvItem = this.inventoryItemsForDropdown.length > 0 ? this.inventoryItemsForDropdown[0] : undefined;
     return {
-      transactionId: 'INV-' + Math.floor(1000 + Math.random() * 9000), // Consider backend generation
-      date: new Date().toISOString().split('T')[0],
-      supplier: this.suppliers.length > 0 ? this.suppliers[0] : '',
-      referenceNo: '',
-      items: defaultItem ? [{
-        item: defaultItem,
-        itemId: defaultItem._id,
-        quantity: 0,
-        rate: defaultItem.purchasePrice || 0, // Default rate from item's purchase price
-        amount: 0
+      CustomTransactionID: 'INV-' + Math.floor(1000 + Math.random() * 9000),
+      TransactionDate: new Date().toISOString().split('T')[0],
+      Supplier: this.suppliers.length > 0 ? this.suppliers[0] : '',
+      ReferenceNo: '',
+      items: defaultInvItem ? [{
+        selectedItem: defaultInvItem,
+        ItemID: defaultInvItem.ItemID,
+        Quantity: 0,
+        Rate: defaultInvItem.PurchasePrice || 0,
+        Amount: 0
       }] : [],
-      totalAmount: 0,
-      receivedBy: '',
-      warehouseLocation: this.warehouseLocations.length > 0 ? this.warehouseLocations[0] : '',
-      notes: ''
+      TotalAmount: 0,
+      ReceivedBy: '',
+      WarehouseLocation: this.warehouseLocations.length > 0 ? this.warehouseLocations[0] : '',
+      Notes: ''
     };
   }
 
-  resetTransactionItems(): void {
-    const defaultItem = this.inventoryItems.length > 0 ? this.inventoryItems[0] : undefined;
-    this.currentTransaction.items = defaultItem ? [{
-        item: defaultItem,
-        itemId: defaultItem._id,
-        quantity: 0,
-        rate: defaultItem.purchasePrice || 0,
-        amount: 0
+  resetTransactionItemsInForm(): void {
+    const defaultInvItem = this.inventoryItemsForDropdown.length > 0 ? this.inventoryItemsForDropdown[0] : undefined;
+    this.currentTransaction.items = defaultInvItem ? [{
+        selectedItem: defaultInvItem,
+        ItemID: defaultInvItem.ItemID,
+        Quantity: 0,
+        Rate: defaultInvItem.PurchasePrice || 0,
+        Amount: 0
       }] : [];
     this.calculateTotal();
   }
 
-
-  // This is important for [(ngModel)] binding with objects in <select>
   compareItems(item1: BackendItem, item2: BackendItem): boolean {
-    return item1 && item2 ? item1._id === item2._id : item1 === item2;
+    return item1 && item2 ? item1.ItemID === item2.ItemID : item1 === item2;
   }
 
   onItemSelectionChange(index: number): void {
-    const selectedFormItem = this.currentTransaction.items[index];
-    if (selectedFormItem && selectedFormItem.item) {
-      selectedFormItem.itemId = selectedFormItem.item._id; // Ensure itemId is updated
-      selectedFormItem.rate = selectedFormItem.item.purchasePrice || 0; // Default rate
-      this.updateItemAmount(index); // Recalculate amount and total
+    const formItem = this.currentTransaction.items[index];
+    if (formItem && formItem.selectedItem) {
+      formItem.ItemID = formItem.selectedItem.ItemID; // Ensure ItemID is from the selected object
+      formItem.Rate = formItem.selectedItem.PurchasePrice || 0;
+      this.updateItemAmount(index);
     }
   }
 
   addItem() {
-    const defaultItem = this.inventoryItems.length > 0 ? this.inventoryItems[0] : undefined;
-    if (!defaultItem) {
+    const defaultInvItem = this.inventoryItemsForDropdown.length > 0 ? this.inventoryItemsForDropdown[0] : undefined;
+    if (!defaultInvItem) {
       alert("No inventory items available to add.");
       return;
     }
     this.currentTransaction.items.push({
-      item: defaultItem,
-      itemId: defaultItem._id,
-      quantity: 0,
-      rate: defaultItem.purchasePrice || 0,
-      amount: 0
+      selectedItem: defaultInvItem,
+      ItemID: defaultInvItem.ItemID,
+      Quantity: 0,
+      Rate: defaultInvItem.PurchasePrice || 0,
+      Amount: 0
     });
     this.calculateTotal();
   }
@@ -203,38 +227,45 @@ export class InvertFormComponent implements OnInit {
 
   updateItemAmount(index: number) {
     const item = this.currentTransaction.items[index];
-    if (item) { // Check if item exists
-        item.amount = (item.quantity || 0) * (item.rate || 0);
+    if (item) {
+        item.Amount = (item.Quantity || 0) * (item.Rate || 0);
         this.calculateTotal();
     }
   }
 
   calculateTotal() {
-    this.currentTransaction.totalAmount = this.currentTransaction.items.reduce(
-      (sum, item) => sum + (item.amount || 0), 0
+    this.currentTransaction.TotalAmount = this.currentTransaction.items.reduce(
+      (sum, item) => sum + (item.Amount || 0), 0
     );
   }
 
   saveTransaction() {
-    // Transform form items to payload items
     const payloadItems: TransactionItemPayload[] = this.currentTransaction.items.map(formItem => ({
-      itemId: formItem.itemId,
-      quantity: formItem.quantity,
-      rate: formItem.rate,
-      amount: formItem.amount
+      ItemID: formItem.ItemID, // Ensure this is the correct ItemID
+      Quantity: formItem.Quantity,
+      Rate: formItem.Rate
+      // Amount can be omitted as backend calculates it, or include formItem.Amount
     }));
 
     const transactionPayload: InvertTransactionPayload = {
-      ...this.currentTransaction,
-      items: payloadItems
+      // TransactionID is part of currentTransaction if editing
+      ...(this.isEditing && this.currentTransaction.TransactionID && { TransactionID: this.currentTransaction.TransactionID }),
+      CustomTransactionID: this.currentTransaction.CustomTransactionID,
+      TransactionDate: this.currentTransaction.TransactionDate,
+      Supplier: this.currentTransaction.Supplier,
+      ReferenceNo: this.currentTransaction.ReferenceNo,
+      items: payloadItems,
+      // TotalAmount: this.currentTransaction.TotalAmount, // Backend calculates this
+      ReceivedBy: this.currentTransaction.ReceivedBy,
+      WarehouseLocation: this.currentTransaction.WarehouseLocation,
+      Notes: this.currentTransaction.Notes
     };
 
-    if (this.isEditing && this.currentTransaction._id) {
-      // Update existing transaction
-      this.http.put<InvertTransactionPayload>(`${this.transactionsApiUrl}/${this.currentTransaction._id}`, transactionPayload).subscribe({
+    if (this.isEditing && transactionPayload.TransactionID) {
+      this.http.put<InvertTransactionPayload>(`${this.transactionsApiUrl}/${transactionPayload.TransactionID}`, transactionPayload).subscribe({
         next: () => {
           alert('Transaction updated successfully!');
-          this.router.navigate(['/main/transaction/invert/list']); // Navigate to list view
+          this.router.navigate(['/main/transaction/invert/list']);
         },
         error: (err) => {
           console.error('Error updating transaction:', err);
@@ -242,12 +273,11 @@ export class InvertFormComponent implements OnInit {
         }
       });
     } else {
-      // Create new transaction
-      const { _id, ...newTxPayload } = transactionPayload; // Remove _id for new transaction
+      const { TransactionID, ...newTxPayload } = transactionPayload; // Exclude TransactionID for new transaction
       this.http.post<InvertTransactionPayload>(this.transactionsApiUrl, newTxPayload).subscribe({
         next: () => {
           alert('Transaction saved successfully!');
-          this.router.navigate(['/main/transaction/invert/list']); // Navigate to list view
+          this.router.navigate(['/main/transaction/invert/list']);
         },
         error: (err) => {
           console.error('Error saving transaction:', err);
@@ -257,13 +287,7 @@ export class InvertFormComponent implements OnInit {
     }
   }
 
-  // The edit and delete operations for transactions are typically managed from the list component.
-  // This form is primarily for create/update.
-  // If 'edit' is triggered by navigating to this form with data, ngOnInit handles it.
-
   resetFormAndNavigateBack() {
-    // this.currentTransaction = this.resetTransactionForm(); // Reset the form state
-    // this.isEditing = false;
-    this.router.navigate(['/main/transaction/invert/list']); // Navigate to list view
+    this.router.navigate(['/main/transaction/invert/list']);
   }
 }

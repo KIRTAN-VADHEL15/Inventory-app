@@ -1,0 +1,50 @@
+Server is running on port 5000
+SQL Server connection error: ConnectionError: Failed to connect to localhost:1433 - Could not connect (sequence)
+    at /app/backend/node_modules/mssql/lib/tedious/connection-pool.js:85:17
+    at Connection.onConnect (/app/backend/node_modules/tedious/lib/connection.js:849:9)
+    at Object.onceWrapper (node:events:632:26)
+    at Connection.emit (node:events:517:28)
+    at Connection.emit (/app/backend/node_modules/tedious/lib/connection.js:970:18)
+    at Connection.socketError (/app/backend/node_modules/tedious/lib/connection.js:1353:12)
+    at /app/backend/node_modules/tedious/lib/connection.js:1146:14
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) {
+  code: 'ESOCKET',
+  originalError: ConnectionError: Failed to connect to localhost:1433 - Could not connect (sequence)
+      at Connection.socketError (/app/backend/node_modules/tedious/lib/connection.js:1353:28)
+      at /app/backend/node_modules/tedious/lib/connection.js:1146:14
+      at process.processTicksAndRejections (node:internal/process/task_queues:77:11) {
+    code: 'ESOCKET',
+    [cause]: AggregateError: Could not connect (sequence)
+        at connectInSequence (/app/backend/node_modules/tedious/lib/connector.js:114:9)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async /app/backend/node_modules/tedious/lib/connection.js:1129:20 {
+      [errors]: [Array]
+    }
+  }
+}
+Error fetching items: RequestError: No connection is specified for that request.
+    at Request._query (/app/backend/node_modules/mssql/lib/base/request.js:493:37)
+    at Request._query (/app/backend/node_modules/mssql/lib/tedious/request.js:363:11)
+    at /app/backend/node_modules/mssql/lib/base/request.js:461:12
+    at new Promise (<anonymous>)
+    at Request.query (/app/backend/node_modules/mssql/lib/base/request.js:460:12)
+    at /app/backend/routes/items.js:51:34
+    at Layer.handleRequest (/app/backend/node_modules/router/lib/layer.js:152:17)
+    at next (/app/backend/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/app/backend/node_modules/router/lib/route.js:117:3)
+    at handle (/app/backend/node_modules/router/index.js:435:11) {
+  code: 'ENOCONN'
+}
+Error fetching items: RequestError: No connection is specified for that request.
+    at Request._query (/app/backend/node_modules/mssql/lib/base/request.js:493:37)
+    at Request._query (/app/backend/node_modules/mssql/lib/tedious/request.js:363:11)
+    at /app/backend/node_modules/mssql/lib/base/request.js:461:12
+    at new Promise (<anonymous>)
+    at Request.query (/app/backend/node_modules/mssql/lib/base/request.js:460:12)
+    at /app/backend/routes/items.js:51:34
+    at Layer.handleRequest (/app/backend/node_modules/router/lib/layer.js:152:17)
+    at next (/app/backend/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/app/backend/node_modules/router/lib/route.js:117:3)
+    at handle (/app/backend/node_modules/router/index.js:435:11) {
+  code: 'ENOCONN'
+}
