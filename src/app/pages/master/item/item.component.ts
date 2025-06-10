@@ -1,15 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core'; // Added inject
+import { HttpClient } from '@angular/common/http'; // Added HttpClient
+import { FormsModule } from '@angular/forms'; // Will be needed in template, ensure module has it
+import { CommonModule } from '@angular/common'; // For *ngIf, *ngFor
+
+interface Item {
+  _id?: string; // MongoDB typically uses _id
+  code: string;
+  name: string;
+  purchasePrice: number | null;
+  sellingPrice: number | null;
+}
 
 @Component({
   selector: 'app-item',
-  standalone: false,
+  standalone: false, // Assuming it stays false based on original
+  // If you convert to standalone:true, ensure imports below are in the component's import array
+  // imports: [CommonModule, FormsModule],
   templateUrl: './item.component.html',
   styleUrls: ['./item.component.css']
 })
 export class ItemComponent implements OnInit {
-  items: any[] = [];
-
-  item = {
+  items: Item[] = [];
+  item: Item = {
     code: '',
     name: '',
     purchasePrice: null,
@@ -17,43 +29,94 @@ export class ItemComponent implements OnInit {
   };
 
   isEdit: boolean = false;
-  editIndex: number = -1;
+  // editIndex: number = -1; // We'll use _id for editing with backend
+  private apiUrl = 'http://localhost:5000/api/items'; // Backend API URL
+
+  // Dependency injection for HttpClient
+  private http = inject(HttpClient);
 
   ngOnInit(): void {
-    if (typeof window !== 'undefined' && localStorage.getItem('items')) {
-      this.items = JSON.parse(localStorage.getItem('items')!);
-    }
+    this.loadItems();
+  }
+
+  loadItems(): void {
+    this.http.get<Item[]>(this.apiUrl).subscribe({
+      next: (data) => {
+        this.items = data;
+      },
+      error: (err) => {
+        console.error('Error loading items:', err);
+        alert('Failed to load items. Check console for details.');
+      }
+    });
   }
 
   onSubmit() {
-    if (this.isEdit) {
-      this.items[this.editIndex] = { ...this.item };
-      this.isEdit = false;
-      this.editIndex = -1;
+    if (this.isEdit && this.item._id) {
+      // Update existing item
+      this.http.put<Item>(`${this.apiUrl}/${this.item._id}`, this.item).subscribe({
+        next: (updatedItem) => {
+          const index = this.items.findIndex(i => i._id === updatedItem._id);
+          if (index !== -1) {
+            this.items[index] = updatedItem;
+          }
+          this.resetForm();
+        },
+        error: (err) => {
+          console.error('Error updating item:', err);
+          alert('Failed to update item. ' + (err.error?.message || ''));
+        }
+      });
     } else {
-      this.items.push({ ...this.item });
+      // Create new item
+      // Make a copy and remove _id if it exists from a previous edit form fill
+      const { _id, ...newItem } = this.item;
+      this.http.post<Item>(this.apiUrl, newItem).subscribe({
+        next: (addedItem) => {
+          this.items.push(addedItem);
+          this.resetForm();
+        },
+        error: (err) => {
+          console.error('Error creating item:', err);
+          alert('Failed to create item. ' + (err.error?.message || ''));
+        }
+      });
     }
-
-    localStorage.setItem('items', JSON.stringify(this.items));
-    this.item = { code: '', name: '', purchasePrice: null, sellingPrice: null };
-
   }
 
-  onEdit(index: number) {
-    this.item = { ...this.items[index] };
+  onEdit(itemToEdit: Item) {
+    // Make a deep copy of the item to avoid modifying the list directly
+    this.item = { ...itemToEdit };
     this.isEdit = true;
-    this.editIndex = index;
+    // No need for editIndex, _id is used
   }
 
-  onDelete(index: number) {
-    this.items.splice(index, 1);
-    // Always update localStorage after deletion
-    localStorage.setItem('items', JSON.stringify(this.items));
-
-    if (this.isEdit && index === this.editIndex) {
-      this.item = { code: '', name: '', purchasePrice: null, sellingPrice: null };
-      this.isEdit = false;
-      this.editIndex = -1;
+  onDelete(itemId: string | undefined) {
+    if (!itemId) {
+      console.error('Item ID is undefined, cannot delete.');
+      alert('Cannot delete item: ID is missing.');
+      return;
     }
+    if (!confirm('Are you sure you want to delete this item?')) {
+      return;
+    }
+    this.http.delete(`${this.apiUrl}/${itemId}`).subscribe({
+      next: () => {
+        this.items = this.items.filter(i => i._id !== itemId);
+        alert('Item deleted successfully.');
+        if (this.isEdit && this.item._id === itemId) {
+          this.resetForm(); // Reset form if the edited item was deleted
+        }
+      },
+      error: (err) => {
+        console.error('Error deleting item:', err);
+        alert('Failed to delete item. Check console for details.');
+      }
+    });
+  }
+
+  resetForm(): void {
+    this.item = { code: '', name: '', purchasePrice: null, sellingPrice: null };
+    this.isEdit = false;
   }
 }

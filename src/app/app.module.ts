@@ -3,6 +3,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { BrowserModule, provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule, provideHttpClient, withFetch } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 // import { RegisterComponent } from './pages/register/register.component';
@@ -50,10 +51,12 @@ import { OutwerdRegisterComponent } from './pages/report/outwerd-register/outwer
     BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    HttpClientModule
   ],
   providers: [
     provideClientHydration(withEventReplay())
+    provideHttpClient(withFetch()),
   ],
   bootstrap: [AppComponent]
 })
